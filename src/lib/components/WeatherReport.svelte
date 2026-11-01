@@ -2,6 +2,7 @@
 	import { page } from '$app/state';
 	import WeatherIcon from './WeatherIcon.svelte';
 
+	// A weather sign hanging in the sky of the farm scene.
 	// `weather` is the summary from lib/server/weather.js, or null if SMHI couldn't be reached.
 	// `preview` is the weather being previewed with /?weather=..., or null.
 	let { weather, preview } = $props();
@@ -27,113 +28,117 @@
 	);
 </script>
 
-<section class="weather" aria-labelledby="weather-title">
-	<div class="card">
-		<header>
-			<h2 id="weather-title">Weather at the farm</h2>
-			{#if weather}
-				<p class="small">Forecast updated {updated}</p>
-			{/if}
-		</header>
+<section class="weather-sign" aria-labelledby="weather-title">
+	<h2 id="weather-title">Weather at the farm</h2>
 
-		{#if weather}
-			<div class="now">
-				<div class="big-icon"><WeatherIcon icon={weather.current.icon} /></div>
-				<p class="temperature">{weather.current.temperature}°</p>
-				<div>
-					<p class="description">{weather.current.text}</p>
-					<!-- A description list: each <dt> is a label, each <dd> its value -->
-					<dl>
-						<div>
-							<dt>Wind</dt>
-							<dd>{weather.current.wind} m/s <span class="small">(gusts {weather.current.gusts})</span></dd>
-						</div>
-						<div>
-							<dt>Rain or snow</dt>
-							<dd>{weather.current.precipitation} mm/h</dd>
-						</div>
-					</dl>
-				</div>
+	{#if weather}
+		<div class="now">
+			<div class="big-icon"><WeatherIcon icon={weather.current.icon} /></div>
+			<p class="temperature">{weather.current.temperature}°</p>
+			<div>
+				<p class="description">{weather.current.text}</p>
+				<!-- A description list: each <dt> is a label, each <dd> its value -->
+				<dl>
+					<div>
+						<dt>Wind</dt>
+						<dd>{weather.current.wind} m/s</dd>
+					</div>
+					<div>
+						<dt>Rain or snow</dt>
+						<dd>{weather.current.precipitation} mm/h</dd>
+					</div>
+				</dl>
 			</div>
+		</div>
 
-			<ol class="days" aria-label="The coming days">
-				{#each weather.days as day (day.date)}
-					<li>
-						<span class="weekday">{day.weekday}</span>
-						<span class="day-icon"><WeatherIcon icon={day.icon} /></span>
-						<span class="visually-hidden">{day.text},</span>
-						<span>{day.max}° <span class="small">/ {day.min}°</span></span>
-					</li>
-				{/each}
-			</ol>
+		<ol class="days" aria-label="The coming days">
+			{#each weather.days as day (day.date)}
+				<li>
+					<span class="weekday">{day.weekday}</span>
+					<span class="day-icon"><WeatherIcon icon={day.icon} /></span>
+					<span class="visually-hidden">{day.text},</span>
+					<span class="temps">{day.max}° <span class="small">/ {day.min}°</span></span>
+				</li>
+			{/each}
+		</ol>
+	{:else}
+		<p class="nap">The weather report is having a nap: we couldn't reach SMHI just now. Please try again later.</p>
+	{/if}
+
+	<p class="small">
+		{#if preview}
+			Showing a <strong>{preview}</strong> preview ·
+			<a href={previewLink(null)} data-sveltekit-reset="false">Real weather</a>
 		{:else}
-			<p class="nap">
-				The weather report is having a nap: we couldn't reach SMHI just now. Please try again in a little
-				while.
-			</p>
+			Try:
+			{#each scenes as scene, i}
+				<a href={previewLink(scene)} data-sveltekit-reset="false">{scene}</a>{i < scenes.length - 1 ? ' · ' : ''}
+			{/each}
 		{/if}
+	</p>
 
-		<p class="preview small">
-			{#if preview}
-				Showing a <strong>{preview}</strong> preview ·
-				<a href={previewLink(null)} data-sveltekit-reset="false">Back to the real weather</a>
-			{:else}
-				Dress the sheep for:
-				{#each scenes as scene, i}
-					<a href={previewLink(scene)} data-sveltekit-reset="false">{scene}</a>{i < scenes.length - 1 ? ' · ' : ''}
-				{/each}
-			{/if}
-		</p>
-
-		<p class="credit small">
-			Weather data from <a href="https://www.smhi.se/en">SMHI</a>, the Swedish Meteorological and Hydrological
-			Institute.
-		</p>
-	</div>
+	<p class="small">
+		Data from <a href="https://www.smhi.se/en">SMHI</a>{#if weather}, updated {updated}{/if}
+	</p>
 </section>
 
 <style>
-	.weather {
-		padding: clamp(1.5rem, 4vw, 2.5rem) var(--gutter) 0;
-		background: var(--grass);
-	}
-
-	/* A little newspaper weather column, in the cartoon style */
-	.card {
+	/* A cream sign in the cartoon style */
+	.weather-sign {
+		position: relative;
 		display: grid;
-		gap: 1rem;
-		max-width: 80rem;
-		margin-inline: auto;
-		padding: 1.25rem 1.5rem;
+		gap: 0.6rem;
+		width: 100%;
+		padding: 1rem 1.25rem;
 		border: var(--outline);
 		border-radius: var(--radius);
 		background: var(--cream);
-		box-shadow: 6px 6px 0 var(--ink);
+		box-shadow: 5px 5px 0 var(--ink);
 	}
 
-	@media (min-width: 60rem) {
-		.card {
-			grid-template-columns: auto 1fr auto;
-			align-items: center;
-			column-gap: 2.5rem;
+	/* Bigger screens: it hangs from the top of the sky on two ropes */
+	@media (min-width: 48rem) {
+		.weather-sign {
+			width: clamp(20rem, 28vw, 24rem);
+			transform-origin: 50% -20rem; /* swing around a point high up the ropes */
 		}
 
-		header,
-		.preview,
-		.credit {
-			grid-column: 1 / -1;
+		.weather-sign::before,
+		.weather-sign::after {
+			content: '';
+			position: absolute;
+			bottom: 100%;
+			width: 3px;
+			height: 100vh; /* long enough to reach the top; the hero cuts off the rest */
+			background: var(--ink);
+		}
+
+		.weather-sign::before {
+			left: 20%;
+		}
+
+		.weather-sign::after {
+			right: 20%;
 		}
 	}
 
-	header {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: baseline;
-		gap: 0.25rem 1rem;
+	@media (min-width: 48rem) and (prefers-reduced-motion: no-preference) {
+		.weather-sign {
+			animation: sway 5s ease-in-out infinite alternate;
+		}
+	}
+
+	@keyframes sway {
+		from {
+			rotate: -1deg;
+		}
+		to {
+			rotate: 1deg;
+		}
 	}
 
 	h2 {
-		font-size: var(--step-1);
+		font-size: var(--step-0);
 	}
 
 	p {
@@ -145,43 +150,39 @@
 		color: var(--ink-soft);
 	}
 
-	/* Icon and temperature side by side; the description moves below them on narrow screens */
 	.now {
 		display: flex;
-		flex-wrap: wrap;
 		align-items: center;
-		gap: 0.5rem 1rem;
-	}
-
-	.now > div:last-child {
-		flex: 1 1 13rem;
+		gap: 0.75rem;
 	}
 
 	.big-icon {
-		width: 4.5rem;
+		width: 3.25rem;
 		flex: none;
 	}
 
 	.temperature {
 		font-family: var(--font-display);
-		font-size: var(--step-4);
+		font-size: var(--step-3);
 		font-weight: 700;
 		line-height: 1;
 	}
 
 	.description {
 		font-family: var(--font-display);
-		font-size: var(--step-1);
 		font-weight: 600;
+		line-height: 1.2;
 	}
 
 	dl {
-		margin: 0.25rem 0 0;
+		margin: 0.15rem 0 0;
+		font-size: var(--step--1);
+		line-height: 1.4;
 	}
 
 	dl div {
 		display: flex;
-		gap: 0.4rem;
+		gap: 0.3rem;
 	}
 
 	dt {
@@ -198,7 +199,7 @@
 
 	.days {
 		display: flex;
-		gap: 0.75rem;
+		gap: 0.5rem;
 		margin: 0;
 		padding: 0;
 		list-style: none;
@@ -207,12 +208,13 @@
 	.days li {
 		display: grid;
 		justify-items: center;
-		gap: 0.2rem;
-		min-width: 4.5rem;
-		padding: 0.5rem 0.6rem;
+		flex: 1 1 0; /* the days share the width evenly */
+		min-width: 0;
+		padding: 0.35rem 0.25rem;
 		border: 2px solid var(--ink);
-		border-radius: 0.9rem;
+		border-radius: 0.8rem;
 		background: var(--wool);
+		font-size: var(--step--1);
 		font-weight: 700;
 	}
 
@@ -221,10 +223,36 @@
 	}
 
 	.day-icon {
-		width: 2.5rem;
+		width: 2rem;
+	}
+
+	.temps {
+		white-space: nowrap; /* keep "10° / 2°" on one line */
 	}
 
 	.nap {
 		font-weight: 700;
+	}
+
+	/* Phones: a more compact sign, so the sheep still fits on the first screen */
+	@media (max-width: 30rem) {
+		.weather-sign {
+			gap: 0.4rem;
+			padding: 0.75rem 1rem;
+		}
+
+		.days li {
+			grid-template-columns: auto auto;
+			column-gap: 0.25rem;
+			align-items: center;
+		}
+
+		.day-icon {
+			width: 1.5rem;
+		}
+
+		.temps {
+			grid-column: 1 / -1;
+		}
 	}
 </style>

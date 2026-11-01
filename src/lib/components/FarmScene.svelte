@@ -203,12 +203,20 @@
 		position: relative;
 		overflow: hidden;
 		background: var(--sky);
+
+		/* Exactly one screen tall (minus the header), so the whole scene is visible at once:
+		   the text takes the space it needs, and the landscape gets the rest */
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		min-height: calc(100svh - var(--header-h));
 	}
 
 	.hero-content {
 		position: relative;
 		z-index: 1;
-		padding: clamp(2rem, 6vw, 5rem) var(--gutter) 0;
+		width: 100%;
+		padding: clamp(1.25rem, 4vh, 3.5rem) var(--gutter) 0;
 		max-width: 80rem;
 		margin-inline: auto;
 	}
@@ -261,10 +269,13 @@
 
 	/* ---------- The landscape strip ---------- */
 
+	/* Fills the space left under the text, but never smaller than 10rem or taller than 28rem */
 	.landscape {
 		position: relative;
-		height: clamp(15rem, 34vw, 28rem);
-		margin-top: -2rem;
+		flex: 1 1 0;
+		min-height: 10rem;
+		max-height: 28rem;
+		margin-top: -1rem;
 	}
 
 	/* The sun is placed before the hills in the HTML, so the far hill covers its lower half */

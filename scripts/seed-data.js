@@ -3,8 +3,8 @@
 // and comments point at their post by a short `key`.
 
 export const users = [
-	{ username: 'per', display_name: 'Per', role: 'host' },
-	{ username: 'maria', display_name: 'Maria', role: 'host' },
+	{ username: 'richard', display_name: 'Richard', role: 'host' },
+	{ username: 'eva', display_name: 'Eva', role: 'host' },
 	{ username: 'sofie', display_name: 'Sofie', role: 'guest' },
 	{ username: 'jonas', display_name: 'Jonas', role: 'guest' },
 	{ username: 'hanna', display_name: 'Hanna', role: 'guest' }
@@ -13,7 +13,7 @@ export const users = [
 export const posts = [
 	{
 		key: 'apples',
-		author: 'per',
+		author: 'richard',
 		title: 'Apple harvest week is here',
 		body: `The old trees behind the barn have outdone themselves this year. The branches are so heavy that we have propped some of them up with planks, and the grass underneath is a carpet of windfalls.
 
@@ -35,7 +35,7 @@ Tip for other guests: wear proper boots, the low part near the stream gets wet a
 	},
 	{
 		key: 'practical',
-		author: 'maria',
+		author: 'eva',
 		title: 'Practical notes for your stay',
 		body: `A few things that make arriving easier.
 
@@ -59,7 +59,7 @@ If you are thinking about booking a few days off-season: do it. Autumn here is q
 	},
 	{
 		key: 'animals',
-		author: 'per',
+		author: 'richard',
 		title: 'Meet the animals this autumn',
 		body: `The sheep are back from the far pasture and now graze in the field closest to the cottages, so you will see them from your window most mornings.
 
@@ -96,7 +96,7 @@ export const comments = [
 	},
 	{
 		post: 'walk',
-		author: 'maria',
+		author: 'eva',
 		body: 'Thank you for walking it and sharing! The rock by the lake is our favourite spot too.',
 		created_at: '2026-10-27T08:05:00Z'
 	}

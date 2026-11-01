@@ -42,25 +42,12 @@
 				<p class="lead">
 					News from the farm and stories from our guests: sheep, apples, forest walks and slow days.
 				</p>
-				<p class="actions">
-					<a class="pill" href="/#farm">From the farm</a>
-					<a class="pill" href="/#guests">Guest stories</a>
-				</p>
 			</div>
 
-			<figure class="polaroid">
-				<img
-					src="/images/sheep-meadow.avif"
-					alt="A flock of sheep walking in single file through tall summer grass, with a line of trees behind them."
-					width="720"
-					height="960"
-				/>
-				<figcaption>The real flock!</figcaption>
-			</figure>
+			<!-- The weather hangs in the sky as part of the scene -->
+			<WeatherReport weather={data.weather} preview={data.preview} />
 		</div>
 	</FarmScene>
-
-	<WeatherReport weather={data.weather} preview={data.preview} />
 
 	<section class="finder" aria-label="Find a story">
 		<!-- A normal GET form: submitting it goes to /?q=..., so the search is part of the URL.
@@ -109,9 +96,21 @@
 	{#if data.show !== 'guests'}
 		<section id="farm" class="farm" aria-labelledby="farm-title">
 			<div class="wrap">
-				<header class="section-head">
-					<h2 id="farm-title">From the farm</h2>
-					<p>News, practical notes and what's happening this season, from the hosts.</p>
+				<header class="section-head farm-head">
+					<div>
+						<h2 id="farm-title">From the farm</h2>
+						<p>News, practical notes and what's happening this season, from Richard and Eva.</p>
+					</div>
+
+					<figure class="polaroid">
+						<img
+							src="/images/sheep-meadow.avif"
+							alt="A flock of sheep walking in single file through tall summer grass, with a line of trees behind them."
+							width="720"
+							height="960"
+						/>
+						<figcaption>The real flock!</figcaption>
+					</figure>
 				</header>
 
 				<div class="signs">
@@ -178,10 +177,11 @@
 
 	/* ---------- Hero text ---------- */
 
+	/* Text on the left, the weather sign on the right (below each other on phones) */
 	.intro {
 		display: grid;
-		gap: var(--gutter);
-		align-items: center;
+		gap: 1rem var(--gutter);
+		align-items: start;
 	}
 
 	@media (min-width: 48rem) {
@@ -190,8 +190,9 @@
 		}
 	}
 
+	/* min(..., 15vh) keeps the title smaller on short screens, so everything fits */
 	h1 {
-		font-size: clamp(3.5rem, 2rem + 8vw, 8rem);
+		font-size: clamp(3rem, min(2rem + 8vw, 15vh), 8rem);
 		font-weight: 700;
 		line-height: 0.95;
 		color: var(--ink);
@@ -199,21 +200,32 @@
 
 	.lead {
 		max-width: 34ch;
-		margin-top: 1rem;
+		margin: 0.75rem 0 0;
 		font-size: var(--step-1);
 		line-height: 1.45;
 	}
 
-	.actions {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.75rem;
+	/* Small, short phones: skip the intro sentence so the sheep and the weather fit on screen */
+	@media (max-width: 30rem) and (max-height: 47.5rem) {
+		.lead {
+			display: none;
+		}
 	}
 
-	/* The real photo, like a polaroid pinned in the sky */
+	/* "From the farm" heading with the real photo next to it */
+	@media (min-width: 48rem) {
+		.farm-head {
+			display: grid;
+			grid-template-columns: 1fr auto;
+			align-items: center;
+			gap: var(--gutter);
+		}
+	}
+
+	/* The real photo, like a polaroid pinned next to the heading */
 	.polaroid {
 		display: none;
-		width: clamp(11rem, 18vw, 15rem);
+		width: clamp(9rem, 14vw, 12rem);
 		margin: 0;
 		padding: 0.6rem 0.6rem 0;
 		border: var(--outline);

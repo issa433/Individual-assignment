@@ -41,6 +41,15 @@
 	--measure: 66ch; /* comfortable line length for reading */
 	--outline: 3px solid var(--ink); /* the cartoon outline */
 	--radius: 1.25rem;
+
+	/* A first guess of the header's height. The layout measures the real one in the browser. */
+	--header-h: 7.5rem;
+}
+
+@media (min-width: 40rem) {
+	:root {
+		--header-h: 4.25rem;
+	}
 }
 
 /* ---------- Base ---------- */

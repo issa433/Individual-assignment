@@ -5,6 +5,10 @@
 	// `children` is the current page, rendered inside this shared layout.
 	// `data.user` comes from +layout.server.js: the signed-in user, or null.
 	let { data, children } = $props();
+
+	// The header's height in pixels, measured by Svelte (bind:clientHeight below).
+	// It's passed to CSS as --header-h, so the homepage can fill exactly the rest of the screen.
+	let headerHeight = $state();
 </script>
 
 <svelte:head>
@@ -14,7 +18,7 @@
 <!-- Lets keyboard users jump past the header straight to the content -->
 <a class="skip-link" href="#main">Skip to content</a>
 
-<header class="site-header">
+<header class="site-header" bind:clientHeight={headerHeight}>
 	<a class="wordmark" href="/">
 		<img src={favicon} alt="" width="40" height="40" />
 		Nissamåla
@@ -39,7 +43,8 @@
 	</nav>
 </header>
 
-<main id="main">
+<!-- Until the header has been measured, app.css has a guess for --header-h -->
+<main id="main" style:--header-h={headerHeight ? `${headerHeight}px` : null}>
 	{@render children()}
 </main>
 
