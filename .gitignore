@@ -19,9 +19,13 @@ Thumbs.db
 .env.*
 !.env.example
 
+# Neon CLI link file (which Neon project/branch this folder uses)
+.neon
+
 # Vite
 vite.config.js.timestamp-*
 
 # Local AI-assistant tooling (not part of the app)
 .claude/
 skills-lock.json
+.mcp.json

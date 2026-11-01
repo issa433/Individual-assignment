@@ -1,15 +1,16 @@
 import { error } from '@sveltejs/kit';
-import { samplePosts, sampleComments } from '#lib/sample-posts.js';
+import { getPost, getComments } from '#lib/server/posts.js';
 
 // `params.id` is the [id] part of the URL, e.g. "3" in /posts/3.
-// URL params are always strings, so we turn it into a number before comparing.
-export function load({ params }) {
-	const post = samplePosts.find((post) => post.id === Number(params.id));
+export async function load({ params }) {
+	// Only accept a plain whole number (max 9 digits fits the database's integer column).
+	// Anything else, like /posts/abc, can't be a post.
+	if (!/^\d{1,9}$/.test(params.id)) error(404, 'We could not find that story.');
 
-	// No such post: show the 404 error page instead
+	const post = await getPost(Number(params.id));
 	if (!post) error(404, 'We could not find that story.');
 
-	const comments = sampleComments.filter((comment) => comment.post_id === post.id);
+	const comments = await getComments(post.id);
 
 	return { post, comments };
 }

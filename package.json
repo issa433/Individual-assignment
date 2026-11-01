@@ -7,7 +7,8 @@
 		"dev": "vite dev",
 		"build": "vite build",
 		"preview": "vite preview",
-		"prepare": "svelte-kit sync || echo ''"
+		"prepare": "svelte-kit sync || echo ''",
+		"seed": "node --env-file=.env scripts/seed.js"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^8.0.0",
@@ -19,5 +20,10 @@
 	"imports": {
 		"#lib": "./src/lib/index.js",
 		"#lib/*": "./src/lib/*"
+	},
+	"dependencies": {
+		"@neon/config": "^1.10.0",
+		"@neon/env": "^1.6.8",
+		"pg": "^8.23.1"
 	}
 }
