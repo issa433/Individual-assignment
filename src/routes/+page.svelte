@@ -2,6 +2,7 @@
 	import FarmScene from '#lib/components/FarmScene.svelte';
 	import PostSign from '#lib/components/PostSign.svelte';
 	import GuestBubble from '#lib/components/GuestBubble.svelte';
+	import WeatherReport from '#lib/components/WeatherReport.svelte';
 
 	// `data` comes from the load function in +page.server.js
 	let { data } = $props();
@@ -31,120 +32,150 @@
 	/>
 </svelte:head>
 
-<FarmScene>
-	<div class="intro">
-		<div>
-			<p class="kicker">Nissamåla gård · outside Karlskrona</p>
-			<h1 id="hero-title">Nissamåla</h1>
-			<p class="lead">
-				News from the farm and stories from our guests: sheep, apples, forest walks and slow days.
-			</p>
-			<p class="actions">
-				<a class="pill" href="/#farm">From the farm</a>
-				<a class="pill" href="/#guests">Guest stories</a>
-			</p>
-		</div>
+<!-- The weather class changes the colours of the sky, clouds and hills (see the style below) -->
+<div class="weather-{data.scene}">
+	<FarmScene scene={data.scene}>
+		<div class="intro">
+			<div>
+				<p class="kicker">Nissamåla gård · outside Karlskrona</p>
+				<h1 id="hero-title">Nissamåla</h1>
+				<p class="lead">
+					News from the farm and stories from our guests: sheep, apples, forest walks and slow days.
+				</p>
+				<p class="actions">
+					<a class="pill" href="/#farm">From the farm</a>
+					<a class="pill" href="/#guests">Guest stories</a>
+				</p>
+			</div>
 
-		<figure class="polaroid">
-			<img
-				src="/images/sheep-meadow.avif"
-				alt="A flock of sheep walking in single file through tall summer grass, with a line of trees behind them."
-				width="720"
-				height="960"
+			<figure class="polaroid">
+				<img
+					src="/images/sheep-meadow.avif"
+					alt="A flock of sheep walking in single file through tall summer grass, with a line of trees behind them."
+					width="720"
+					height="960"
+				/>
+				<figcaption>The real flock!</figcaption>
+			</figure>
+		</div>
+	</FarmScene>
+
+	<WeatherReport weather={data.weather} preview={data.preview} />
+
+	<section class="finder" aria-label="Find a story">
+		<!-- A normal GET form: submitting it goes to /?q=..., so the search is part of the URL.
+		     data-sveltekit-reset="false" keeps the scroll position and focus instead of jumping to the top. -->
+		<form method="GET" action="/" role="search" data-sveltekit-reset="false">
+			<label for="search" class="visually-hidden">Search stories</label>
+			<input
+				id="search"
+				type="search"
+				name="q"
+				value={data.search}
+				placeholder="Search stories, e.g. apples"
+				maxlength="100"
 			/>
-			<figcaption>The real flock!</figcaption>
-		</figure>
-	</div>
-</FarmScene>
+			<!-- Keep the chosen tab when searching -->
+			{#if data.show !== 'all'}
+				<input type="hidden" name="show" value={data.show} />
+			{/if}
+			<button class="pill pill-primary">Search</button>
+		</form>
 
-<section class="finder" aria-label="Find a story">
-	<!-- A normal GET form: submitting it goes to /?q=..., so the search is part of the URL.
-	     data-sveltekit-reset="false" keeps the scroll position and focus instead of jumping to the top. -->
-	<form method="GET" action="/" role="search" data-sveltekit-reset="false">
-		<label for="search" class="visually-hidden">Search stories</label>
-		<input
-			id="search"
-			type="search"
-			name="q"
-			value={data.search}
-			placeholder="Search stories, e.g. apples"
-			maxlength="100"
-		/>
-		<!-- Keep the chosen tab when searching -->
-		{#if data.show !== 'all'}
-			<input type="hidden" name="show" value={data.show} />
-		{/if}
-		<button class="pill pill-primary">Search</button>
-	</form>
+		<!-- aria-current tells screen readers which tab is chosen; CSS uses it to colour that tab -->
+		<nav class="tabs" aria-label="Show stories from">
+			{#each tabs as tab}
+				<a
+					class="pill"
+					href={tabLink(tab.show)}
+					aria-current={data.show === tab.show ? 'page' : undefined}
+					data-sveltekit-reset="false"
+				>
+					{tab.label}
+				</a>
+			{/each}
+		</nav>
 
-	<!-- aria-current tells screen readers which tab is chosen; CSS uses it to colour that tab -->
-	<nav class="tabs" aria-label="Show stories from">
-		{#each tabs as tab}
-			<a
-				class="pill"
-				href={tabLink(tab.show)}
-				aria-current={data.show === tab.show ? 'page' : undefined}
-				data-sveltekit-reset="false"
-			>
-				{tab.label}
-			</a>
-		{/each}
-	</nav>
-
-	<!-- aria-live reads the result count aloud to screen reader users when it changes -->
-	<p class="result-count" aria-live="polite">
-		{#if data.search}
-			{resultCount}
-			{resultCount === 1 ? 'story' : 'stories'} found for “{data.search}” ·
-			<a href={data.show === 'all' ? '/' : `/?show=${data.show}`} data-sveltekit-reset="false">Clear search</a>
-		{/if}
-	</p>
-</section>
-
-{#if data.show !== 'guests'}
-	<section id="farm" class="farm" aria-labelledby="farm-title">
-		<div class="wrap">
-			<header class="section-head">
-				<h2 id="farm-title">From the farm</h2>
-				<p>News, practical notes and what's happening this season, from the hosts.</p>
-			</header>
-
-			<div class="signs">
-				{#each data.hostPosts as post, i (post.id)}
-					<PostSign {post} featured={i === 0} />
-				{:else}
-					<p>{data.search ? 'No news from the farm matches your search.' : 'No news from the farm yet.'}</p>
-				{/each}
-			</div>
-		</div>
+		<!-- aria-live reads the result count aloud to screen reader users when it changes -->
+		<p class="result-count" aria-live="polite">
+			{#if data.search}
+				{resultCount}
+				{resultCount === 1 ? 'story' : 'stories'} found for “{data.search}” ·
+				<a href={data.show === 'all' ? '/' : `/?show=${data.show}`} data-sveltekit-reset="false">Clear search</a>
+			{/if}
+		</p>
 	</section>
-{/if}
 
-{#if data.show !== 'farm'}
-	<section id="guests" class="guests" aria-labelledby="guests-title">
-		<!-- A wavy hilltop where the light green meets the dark green -->
-		<svg class="wave" viewBox="0 0 1440 60" preserveAspectRatio="none" aria-hidden="true">
-			<path d="M0 30 C240 0 480 0 720 25 C960 50 1200 55 1440 20 V60 H0Z" />
-		</svg>
+	{#if data.show !== 'guests'}
+		<section id="farm" class="farm" aria-labelledby="farm-title">
+			<div class="wrap">
+				<header class="section-head">
+					<h2 id="farm-title">From the farm</h2>
+					<p>News, practical notes and what's happening this season, from the hosts.</p>
+				</header>
 
-		<div class="wrap">
-			<header class="section-head">
-				<h2 id="guests-title">Guest stories</h2>
-				<p>Walks, finds and slow days, written by the people who stayed with us.</p>
-			</header>
-
-			<div class="bubbles">
-				{#each data.guestPosts as post (post.id)}
-					<GuestBubble {post} />
-				{:else}
-					<p>{data.search ? 'No guest stories match your search.' : 'No guest stories yet.'}</p>
-				{/each}
+				<div class="signs">
+					{#each data.hostPosts as post, i (post.id)}
+						<PostSign {post} featured={i === 0} />
+					{:else}
+						<p>{data.search ? 'No news from the farm matches your search.' : 'No news from the farm yet.'}</p>
+					{/each}
+				</div>
 			</div>
-		</div>
-	</section>
-{/if}
+		</section>
+	{/if}
+
+	{#if data.show !== 'farm'}
+		<section id="guests" class="guests" aria-labelledby="guests-title">
+			<!-- A wavy hilltop where the light green meets the dark green -->
+			<svg class="wave" viewBox="0 0 1440 60" preserveAspectRatio="none" aria-hidden="true">
+				<path d="M0 30 C240 0 480 0 720 25 C960 50 1200 55 1440 20 V60 H0Z" />
+			</svg>
+
+			<div class="wrap">
+				<header class="section-head">
+					<h2 id="guests-title">Guest stories</h2>
+					<p>Walks, finds and slow days, written by the people who stayed with us.</p>
+				</header>
+
+				<div class="bubbles">
+					{#each data.guestPosts as post (post.id)}
+						<GuestBubble {post} />
+					{:else}
+						<p>{data.search ? 'No guest stories match your search.' : 'No guest stories yet.'}</p>
+					{/each}
+				</div>
+			</div>
+		</section>
+	{/if}
+</div>
 
 <style>
+	/* ---------- Colours for each weather ----------
+	   Custom properties are inherited, so the scene, the hills and the sections inside
+	   this div all pick up the new colours. Sunny uses the normal colours from app.css. */
+
+	.weather-cloudy {
+		--sky: #d6dee3;
+		--cloud: #f3f5f7;
+	}
+
+	.weather-rainy {
+		--sky: #a9b8c2;
+		--cloud: #7f8d97;
+		--hill-far: #a9c98e;
+		--hill-mid: #94bd78;
+		--grass: #86b36b; /* ink text on it is still 5.9:1 */
+	}
+
+	.weather-snowy {
+		--sky: #dde6eb;
+		--cloud: #ffffff;
+		--hill-far: #ffffff;
+		--hill-mid: #f1f6f8;
+		--grass: #e4eef2;
+	}
+
 	/* ---------- Hero text ---------- */
 
 	.intro {
