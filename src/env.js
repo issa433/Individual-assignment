@@ -27,5 +27,15 @@ export const variables = defineEnvVars({
 	HOST_INVITE_CODE: {
 		description: 'Invite code that creates a host account',
 		schema: requiredCode
+	},
+	// The two OpenRouter values are optional: without them the site still works,
+	// and only "Write it for me" shows a message that it isn't set up.
+	OPENROUTER_API_KEY: {
+		description: 'Secret API key from openrouter.ai, used by "Write it for me"',
+		schema: (value) => value || undefined
+	},
+	OPENROUTER_MODEL: {
+		description: 'Which AI model OpenRouter should use, e.g. openai/gpt-4o-mini',
+		schema: (value) => value || undefined
 	}
 });
