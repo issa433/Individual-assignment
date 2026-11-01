@@ -34,6 +34,7 @@ An individual school project for *Programming & Methods* at Berghs School of Com
 | AI | [OpenRouter](https://openrouter.ai) chat completions API |
 | Fonts | Fredoka (headlines) and Nunito (text) from Google Fonts |
 | Illustrations | Hand-written SVG in Svelte components |
+| Hosting | [Vercel](https://vercel.com) (`@sveltejs/adapter-vercel`), in Frankfurt next to the Neon database |
 
 ## Running it locally
 
@@ -53,6 +54,15 @@ Other commands:
 | `npm run build` | Builds the production version |
 | `npm run preview` | Runs the production build locally |
 | `npm run seed` | **Deletes all data**, creates the tables again from `schema.sql`, and adds sample users, posts and comments |
+
+## Putting it online (Vercel)
+
+1. Push the code to GitHub.
+2. On [vercel.com](https://vercel.com), choose **Add New → Project** and import the repository.
+3. Under **Environment Variables**, add `DATABASE_URL`, `GUEST_INVITE_CODE`, `HOST_INVITE_CODE`, `OPENROUTER_API_KEY` and `OPENROUTER_MODEL` with the same values as in `.env`.
+4. Click **Deploy**. Every later push to GitHub deploys the new version automatically.
+
+The adapter settings are in `vite.config.js`. The site runs in Vercel's Frankfurt region (`fra1`), close to the Neon database in `aws-eu-central-1`.
 
 ## Configuration
 
@@ -81,10 +91,16 @@ Anyone who registers with the guest code becomes a **guest**, and anyone with th
 
 ```
 OPENROUTER_API_KEY="sk-or-..."
-OPENROUTER_MODEL="openai/gpt-4o-mini"
+OPENROUTER_MODEL="google/gemma-4-31b-it:free,nvidia/nemotron-3.5-lightning:free"
 ```
 
-Create a key at [openrouter.ai/keys](https://openrouter.ai/keys). `OPENROUTER_MODEL` can be any model id from [openrouter.ai/models](https://openrouter.ai/models). Change it and restart the dev server to compare models. Both values are optional: without them the rest of the site works, and "Write it for me" shows that it isn't set up.
+Create a key at [openrouter.ai/keys](https://openrouter.ai/keys).
+
+- **Free models only.** The site only uses OpenRouter's free models, whose id ends in `:free`, so "Write it for me" never costs anything. A safety switch (`ONLY_FREE_MODELS` in the endpoint) refuses paid models.
+- **Several models:** separate them with commas. If the first one is busy, OpenRouter tries the next.
+- **Comparing models:** find free models at [openrouter.ai/models](https://openrouter.ai/models). Change the list and restart the dev server.
+- **Daily limits:** free models have a daily limit on OpenRouter's side. The site also allows each user 10 drafts per day and everyone together 100 per day ([src/lib/server/ai-limit.js](src/lib/server/ai-limit.js)), so one person can't use up the quota.
+- **Optional:** both values can be left out. The rest of the site works, and "Write it for me" shows that it isn't set up.
 
 ### The farm's coordinates
 
@@ -127,7 +143,7 @@ The sample authors created by `npm run seed` (Richard, Eva, Sofie, Jonas and Han
 
 ```
 1. browser    → my server    the user's rough notes
-2. my server                 checks the user is signed in and the notes are 10–1000 characters
+2. my server                 checks sign-in, the notes' length (10–1000) and the daily limit
 3. my server  → OpenRouter   notes + system prompt + the secret API key
 4. OpenRouter → my server    the AI's answer
 5. my server  → browser      { title, body }
@@ -160,11 +176,10 @@ The sample authors created by `npm run seed` (Richard, Eva, Sofie, Jonas and Han
 ## Left out on purpose
 
 - **Image uploads** (the only photo is part of the site's design).
-- **Deployment.** The project runs locally. `adapter-auto` would need a hosting choice.
 - **Moderation tools** beyond deleting posts: no reporting, banning, or deleting comments.
 - **Editing** posts or comments after publishing.
 - **Password reset, email and account settings.**
-- **Rate limiting** for sign-in attempts and AI requests.
+- **Rate limiting** for sign-in attempts. AI requests do have a daily limit.
 - **Pagination.** All posts are listed, which is fine at a farm journal's scale.
 - **A night version** of the scene. The sun shows for clear skies even at night.
 

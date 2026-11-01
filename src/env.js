@@ -35,7 +35,7 @@ export const variables = defineEnvVars({
 		schema: (value) => value || undefined
 	},
 	OPENROUTER_MODEL: {
-		description: 'Which AI model OpenRouter should use, e.g. openai/gpt-4o-mini',
+		description: 'Free OpenRouter model(s) to use, comma-separated, e.g. google/gemma-4-31b-it:free',
 		schema: (value) => value || undefined
 	}
 });

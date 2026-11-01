@@ -3,7 +3,7 @@
 -- WARNING: running this file deletes all tables and their data, then creates them again.
 -- It is run by `npm run seed` (scripts/seed.js).
 
-DROP TABLE IF EXISTS comments, posts, sessions, users;
+DROP TABLE IF EXISTS ai_drafts, comments, posts, sessions, users;
 
 -- Everyone who can sign in. The role decides where their posts are shown:
 -- 'host' posts go under "From the farm", 'guest' posts under "Guest stories".
@@ -37,6 +37,14 @@ CREATE TABLE comments (
 	post_id    integer NOT NULL REFERENCES posts (id) ON DELETE CASCADE,
 	author_id  integer NOT NULL REFERENCES users (id) ON DELETE CASCADE,
 	body       text NOT NULL CHECK (length(body) BETWEEN 1 AND 2000),
+	created_at timestamptz NOT NULL DEFAULT now()
+);
+
+-- One row every time someone uses "Write it for me", so we can limit how often
+-- the AI is used per day (every AI request costs a little money).
+CREATE TABLE ai_drafts (
+	id         integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+	user_id    integer NOT NULL REFERENCES users (id) ON DELETE CASCADE,
 	created_at timestamptz NOT NULL DEFAULT now()
 );
 
