@@ -24,6 +24,7 @@
 			<li><a class="pill" href="/#farm">From the farm</a></li>
 			<li><a class="pill" href="/#guests">Guest stories</a></li>
 			{#if data.user}
+				<li><a class="pill pill-primary" href="/posts/new">Write a post</a></li>
 				<li class="hello">Hi, {data.user.display_name}!</li>
 				<li>
 					<!-- Signing out is a POST form, not a link (see routes/logout) -->

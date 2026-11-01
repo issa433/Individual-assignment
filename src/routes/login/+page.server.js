@@ -1,14 +1,23 @@
 import { fail, redirect } from '@sveltejs/kit';
 import { checkPassword, createSession, getUserByUsername, setSessionCookie } from '#lib/server/auth.js';
 
-// Already signed in? Go to the homepage.
-export function load({ locals }) {
-	if (locals.user) redirect(303, '/');
+// Where to go after signing in, e.g. /login?redirectTo=/posts/3 goes back to post 3.
+// Only paths on our own site are allowed (one leading /), so a link with
+// redirectTo=https://evil.example can't send people to another website.
+function safeRedirect(url) {
+	const target = url.searchParams.get('redirectTo') ?? '/';
+	const isOwnSite = target.startsWith('/') && !target.startsWith('//') && !target.startsWith('/\\');
+	return isOwnSite ? target : '/';
+}
+
+// Already signed in? Go straight on.
+export function load({ locals, url }) {
+	if (locals.user) redirect(303, safeRedirect(url));
 }
 
 export const actions = {
 	// Runs when the sign-in form is submitted
-	default: async ({ request, cookies }) => {
+	default: async ({ request, cookies, url }) => {
 		const form = await request.formData();
 		const username = String(form.get('username') ?? '')
 			.trim()
@@ -26,6 +35,6 @@ export const actions = {
 		const session = await createSession(user.id);
 		setSessionCookie(cookies, session);
 
-		redirect(303, '/');
+		redirect(303, safeRedirect(url));
 	}
 };

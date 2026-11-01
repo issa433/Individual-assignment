@@ -1,7 +1,8 @@
 <script>
 	import { formatDate, isoDate, paragraphs, sectionName } from '#lib/format.js';
 
-	let { data } = $props();
+	// `form` is what the comment action returned if something was wrong
+	let { data, form } = $props();
 	let post = $derived(data.post);
 
 	// Go back to the section the post belongs to on the homepage
@@ -30,9 +31,23 @@
 			{#each paragraphs(post.body) as paragraph}
 				<p>{paragraph}</p>
 			{/each}
+
+			{#if data.canDelete}
+				<!-- Asks "are you sure?" first. Clicking Cancel stops the form from being sent. -->
+				<form
+					class="delete-form"
+					method="POST"
+					action="?/delete"
+					onsubmit={(event) => {
+						if (!confirm('Delete this post and its comments? This cannot be undone.')) event.preventDefault();
+					}}
+				>
+					<button class="pill pill-danger">Delete post</button>
+				</form>
+			{/if}
 		</article>
 
-		<section class="comments" aria-labelledby="comments-title">
+		<section id="comments" class="comments" aria-labelledby="comments-title">
 			<h2 id="comments-title">Comments ({data.comments.length})</h2>
 
 			{#each data.comments as comment (comment.id)}
@@ -47,8 +62,20 @@
 				<p>No comments yet.</p>
 			{/each}
 
-			{#if !data.user}
-				<p class="byline sign-in-note"><a href="/login">Sign in</a> to leave a comment.</p>
+			{#if data.user}
+				<!-- "?/comment" runs the action called `comment` in +page.server.js -->
+				<form class="comment-form" method="POST" action="?/comment">
+					{#if form?.error}
+						<p class="form-error" role="alert">{form.error}</p>
+					{/if}
+					<label for="comment-body">Write a comment as {data.user.display_name}</label>
+					<textarea id="comment-body" name="body" rows="3" maxlength="2000" required>{form?.body ?? ''}</textarea>
+					<button class="pill pill-primary">Post comment</button>
+				</form>
+			{:else}
+				<p class="byline sign-in-note">
+					<a href="/login?redirectTo=/posts/{post.id}">Sign in</a> to leave a comment.
+				</p>
 			{/if}
 		</section>
 	</div>
@@ -90,6 +117,24 @@
 		font-weight: 700;
 	}
 
+	.delete-form {
+		margin-top: 2rem;
+		padding-top: 1.25rem;
+		border-top: 2px dashed var(--ink-soft);
+	}
+
+	/* Red button for an action that can't be undone (cream on barn red is 5.2:1) */
+	.pill-danger {
+		background: var(--barn);
+		color: var(--cream);
+		font-size: var(--step--1);
+	}
+
+	.pill-danger:hover {
+		background: #962f20;
+		color: var(--cream);
+	}
+
 	.comments {
 		margin-top: 3.5rem;
 	}
@@ -110,6 +155,22 @@
 
 	.comment p {
 		margin: 0;
+		white-space: pre-line; /* keep the line breaks the writer typed */
+	}
+
+	.comment-form {
+		display: grid;
+		gap: 0.5rem;
+		justify-items: start;
+		margin-top: 1.5rem;
+	}
+
+	.comment-form label {
+		font-weight: 800;
+	}
+
+	.comment-form textarea {
+		resize: vertical;
 	}
 
 	.comment .byline {
