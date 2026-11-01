@@ -5,6 +5,22 @@
 
 	// `data` comes from the load function in +page.server.js
 	let { data } = $props();
+
+	const tabs = [
+		{ show: 'all', label: 'All' },
+		{ show: 'farm', label: 'From the farm' },
+		{ show: 'guests', label: 'Guest stories' }
+	];
+
+	// The link for a tab keeps the current search, e.g. /?q=apple&show=farm
+	function tabLink(show) {
+		const params = new URLSearchParams();
+		if (data.search) params.set('q', data.search);
+		if (show !== 'all') params.set('show', show);
+		return params.size > 0 ? `/?${params}` : '/';
+	}
+
+	let resultCount = $derived(data.hostPosts.length + data.guestPosts.length);
 </script>
 
 <svelte:head>
@@ -24,8 +40,8 @@
 				News from the farm and stories from our guests: sheep, apples, forest walks and slow days.
 			</p>
 			<p class="actions">
-				<a class="pill" href="#farm">From the farm</a>
-				<a class="pill" href="#guests">Guest stories</a>
+				<a class="pill" href="/#farm">From the farm</a>
+				<a class="pill" href="/#guests">Guest stories</a>
 			</p>
 		</div>
 
@@ -41,44 +57,92 @@
 	</div>
 </FarmScene>
 
-<section id="farm" class="farm" aria-labelledby="farm-title">
-	<div class="wrap">
-		<header class="section-head">
-			<h2 id="farm-title">From the farm</h2>
-			<p>News, practical notes and what's happening this season, from the hosts.</p>
-		</header>
+<section class="finder" aria-label="Find a story">
+	<!-- A normal GET form: submitting it goes to /?q=..., so the search is part of the URL.
+	     data-sveltekit-reset="false" keeps the scroll position and focus instead of jumping to the top. -->
+	<form method="GET" action="/" role="search" data-sveltekit-reset="false">
+		<label for="search" class="visually-hidden">Search stories</label>
+		<input
+			id="search"
+			type="search"
+			name="q"
+			value={data.search}
+			placeholder="Search stories, e.g. apples"
+			maxlength="100"
+		/>
+		<!-- Keep the chosen tab when searching -->
+		{#if data.show !== 'all'}
+			<input type="hidden" name="show" value={data.show} />
+		{/if}
+		<button class="pill pill-primary">Search</button>
+	</form>
 
-		<div class="signs">
-			{#each data.hostPosts as post, i (post.id)}
-				<PostSign {post} featured={i === 0} />
-			{:else}
-				<p>No news from the farm yet.</p>
-			{/each}
-		</div>
-	</div>
+	<!-- aria-current tells screen readers which tab is chosen; CSS uses it to colour that tab -->
+	<nav class="tabs" aria-label="Show stories from">
+		{#each tabs as tab}
+			<a
+				class="pill"
+				href={tabLink(tab.show)}
+				aria-current={data.show === tab.show ? 'page' : undefined}
+				data-sveltekit-reset="false"
+			>
+				{tab.label}
+			</a>
+		{/each}
+	</nav>
+
+	<!-- aria-live reads the result count aloud to screen reader users when it changes -->
+	<p class="result-count" aria-live="polite">
+		{#if data.search}
+			{resultCount}
+			{resultCount === 1 ? 'story' : 'stories'} found for “{data.search}” ·
+			<a href={data.show === 'all' ? '/' : `/?show=${data.show}`} data-sveltekit-reset="false">Clear search</a>
+		{/if}
+	</p>
 </section>
 
-<section id="guests" class="guests" aria-labelledby="guests-title">
-	<!-- A wavy hilltop where the light green meets the dark green -->
-	<svg class="wave" viewBox="0 0 1440 60" preserveAspectRatio="none" aria-hidden="true">
-		<path d="M0 30 C240 0 480 0 720 25 C960 50 1200 55 1440 20 V60 H0Z" />
-	</svg>
+{#if data.show !== 'guests'}
+	<section id="farm" class="farm" aria-labelledby="farm-title">
+		<div class="wrap">
+			<header class="section-head">
+				<h2 id="farm-title">From the farm</h2>
+				<p>News, practical notes and what's happening this season, from the hosts.</p>
+			</header>
 
-	<div class="wrap">
-		<header class="section-head">
-			<h2 id="guests-title">Guest stories</h2>
-			<p>Walks, finds and slow days, written by the people who stayed with us.</p>
-		</header>
-
-		<div class="bubbles">
-			{#each data.guestPosts as post (post.id)}
-				<GuestBubble {post} />
-			{:else}
-				<p>No guest stories yet.</p>
-			{/each}
+			<div class="signs">
+				{#each data.hostPosts as post, i (post.id)}
+					<PostSign {post} featured={i === 0} />
+				{:else}
+					<p>{data.search ? 'No news from the farm matches your search.' : 'No news from the farm yet.'}</p>
+				{/each}
+			</div>
 		</div>
-	</div>
-</section>
+	</section>
+{/if}
+
+{#if data.show !== 'farm'}
+	<section id="guests" class="guests" aria-labelledby="guests-title">
+		<!-- A wavy hilltop where the light green meets the dark green -->
+		<svg class="wave" viewBox="0 0 1440 60" preserveAspectRatio="none" aria-hidden="true">
+			<path d="M0 30 C240 0 480 0 720 25 C960 50 1200 55 1440 20 V60 H0Z" />
+		</svg>
+
+		<div class="wrap">
+			<header class="section-head">
+				<h2 id="guests-title">Guest stories</h2>
+				<p>Walks, finds and slow days, written by the people who stayed with us.</p>
+			</header>
+
+			<div class="bubbles">
+				{#each data.guestPosts as post (post.id)}
+					<GuestBubble {post} />
+				{:else}
+					<p>{data.search ? 'No guest stories match your search.' : 'No guest stories yet.'}</p>
+				{/each}
+			</div>
+		</div>
+	</section>
+{/if}
 
 <style>
 	/* ---------- Hero text ---------- */
@@ -148,6 +212,52 @@
 		text-align: center;
 	}
 
+	/* ---------- Search and tabs ---------- */
+
+	.finder {
+		display: grid;
+		gap: 1rem;
+		padding: clamp(1.5rem, 4vw, 2.5rem) var(--gutter) 0;
+		background: var(--grass);
+	}
+
+	.finder > * {
+		width: 100%;
+		max-width: 80rem;
+		margin-inline: auto;
+	}
+
+	form {
+		display: flex;
+		gap: 0.6rem;
+	}
+
+	form input {
+		max-width: 30rem;
+		border-radius: 999px;
+		padding-inline: 1.1rem;
+	}
+
+	.tabs {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.6rem;
+	}
+
+	.tabs .pill {
+		font-size: var(--step--1);
+	}
+
+	/* The chosen tab is sunny yellow */
+	.tabs [aria-current='page'] {
+		background: var(--sun);
+	}
+
+	.result-count {
+		margin: 0;
+		font-weight: 700;
+	}
+
 	/* ---------- Sections ---------- */
 
 	.wrap {
@@ -178,6 +288,13 @@
 		display: grid;
 		grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
 		gap: 2rem;
+	}
+
+	/* "No stories..." messages use the full width instead of one grid column */
+	.signs > p,
+	.bubbles > p {
+		grid-column: 1 / -1;
+		font-weight: 700;
 	}
 
 	/* The newest post gets a double-width sign on bigger screens */

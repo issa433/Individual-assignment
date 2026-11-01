@@ -4,19 +4,31 @@ import { db } from './db.js';
 // Values are never glued into the SQL text. They are sent separately as $1, $2...
 // so the database always treats them as data, which prevents SQL injection.
 
-// All posts by hosts or by guests, newest first.
+// All posts by hosts or by guests, newest first, optionally only those matching a search.
 // JOIN users gives us the author's name, and their role decides the section.
-export async function getPostsByRole(role) {
+//
+// ILIKE is a case-insensitive LIKE: '%apple%' matches any text containing "apple" or "Apple".
+// When there is no search we send NULL as $2, and "$2 IS NULL" makes the search part always true.
+export async function getPosts(role, search) {
+	const pattern = search ? `%${escapeLike(search)}%` : null;
+
 	const result = await db.query(
 		`SELECT posts.id, posts.title, posts.body, posts.created_at,
 		        users.display_name AS author_name, users.role AS author_role
 		 FROM posts
 		 JOIN users ON users.id = posts.author_id
 		 WHERE users.role = $1
+		   AND ($2::text IS NULL OR posts.title ILIKE $2 OR posts.body ILIKE $2)
 		 ORDER BY posts.created_at DESC`,
-		[role]
+		[role, pattern]
 	);
 	return result.rows;
+}
+
+// In LIKE patterns, % means "anything" and _ means "any one character".
+// We put a backslash in front of them, so searching for "100%" looks for a real % sign.
+function escapeLike(text) {
+	return text.replace(/[\\%_]/g, '\\$&');
 }
 
 // One post, or undefined if there is no post with that id.
