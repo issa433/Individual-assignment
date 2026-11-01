@@ -47,7 +47,9 @@
 				<p>No comments yet.</p>
 			{/each}
 
-			<p class="byline sign-in-note">Sign in to leave a comment.</p>
+			{#if !data.user}
+				<p class="byline sign-in-note"><a href="/login">Sign in</a> to leave a comment.</p>
+			{/if}
 		</section>
 	</div>
 </div>

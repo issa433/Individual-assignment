@@ -135,9 +135,12 @@ a:hover {
 	border-radius: 999px;
 	background: var(--cream);
 	box-shadow: 3px 3px 0 var(--ink);
+	color: var(--ink);
 	font-family: var(--font-display);
+	font-size: inherit;
 	font-weight: 600;
 	text-decoration: none;
+	cursor: pointer;
 	transition:
 		translate 0.15s,
 		box-shadow 0.15s;
@@ -148,6 +151,76 @@ a:hover {
 	background: var(--sun);
 	translate: -1px -1px;
 	box-shadow: 4px 4px 0 var(--ink);
+}
+
+/* The main action in a form, in sunny yellow */
+.pill-primary {
+	background: var(--sun);
+}
+
+/* ---------- Forms ---------- */
+
+/* A light green page with a cream card in the middle */
+.form-page {
+	flex: 1;
+	padding: clamp(2rem, 6vw, 4rem) var(--gutter) 5rem;
+	background: var(--hill-far);
+}
+
+.form-card {
+	width: min(30rem, 100%);
+	margin-inline: auto;
+	padding: clamp(1.5rem, 5vw, 2.5rem);
+	border: var(--outline);
+	border-radius: var(--radius);
+	background: var(--cream);
+	box-shadow: 8px 8px 0 var(--ink);
+}
+
+.form-card h1 {
+	margin-bottom: 0.5rem;
+	font-size: var(--step-2);
+	font-weight: 700;
+}
+
+.field {
+	display: grid;
+	gap: 0.3rem;
+	margin-bottom: 1.1rem;
+}
+
+.field label {
+	font-weight: 800;
+}
+
+.hint {
+	margin: 0;
+	font-size: var(--step--1);
+	color: var(--ink-soft);
+}
+
+input,
+textarea {
+	width: 100%;
+	padding: 0.6rem 0.8rem;
+	border: var(--outline);
+	border-radius: 0.75rem;
+	background: var(--wool);
+	color: var(--ink);
+	font: inherit;
+}
+
+.form-error {
+	padding: 0.7rem 1rem;
+	border: 3px solid var(--barn);
+	border-radius: 0.75rem;
+	background: #fde3dd;
+	font-weight: 700;
+}
+
+.switch {
+	margin: 1.25rem 0 0;
+	font-size: var(--step--1);
 }
 
 /* Hidden on screen but still read by screen readers */

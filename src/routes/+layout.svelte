@@ -2,8 +2,9 @@
 	import '../app.css';
 	import favicon from '#lib/assets/favicon.svg';
 
-	// `children` is the current page, rendered inside this shared layout
-	let { children } = $props();
+	// `children` is the current page, rendered inside this shared layout.
+	// `data.user` comes from +layout.server.js: the signed-in user, or null.
+	let { data, children } = $props();
 </script>
 
 <svelte:head>
@@ -22,6 +23,17 @@
 		<ul>
 			<li><a class="pill" href="/#farm">From the farm</a></li>
 			<li><a class="pill" href="/#guests">Guest stories</a></li>
+			{#if data.user}
+				<li class="hello">Hi, {data.user.display_name}!</li>
+				<li>
+					<!-- Signing out is a POST form, not a link (see routes/logout) -->
+					<form method="POST" action="/logout">
+						<button class="pill">Sign out</button>
+					</form>
+				</li>
+			{:else}
+				<li><a class="pill pill-primary" href="/login">Sign in</a></li>
+			{/if}
 		</ul>
 	</nav>
 </header>
@@ -88,6 +100,9 @@
 
 	nav ul {
 		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		align-items: center;
 		gap: 0.6rem;
 		margin: 0;
 		padding: 0;
@@ -96,6 +111,12 @@
 
 	nav .pill {
 		padding: 0.25rem 0.9rem;
+		font-size: var(--step--1);
+	}
+
+	.hello {
+		font-family: var(--font-display);
+		font-weight: 600;
 		font-size: var(--step--1);
 	}
 
