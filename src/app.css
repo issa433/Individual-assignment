@@ -1,0 +1,161 @@
+/*
+  Nissamåla Farm design system.
+  Everything shared by all pages lives here: colours, type, spacing and focus styles.
+  Page-specific styles live inside each .svelte file.
+
+  The style: a cute 2D cartoon farm. Flat colours, thick dark outlines
+  and solid "sticker" shadows instead of blurry ones.
+*/
+
+/* ---------- Design tokens ---------- */
+
+:root {
+	/* Colours (contrast ratios measured against --cream) */
+	--cream: #fff8ec; /* paper, signboards, speech bubbles */
+	--ink: #33291f; /* warm near-black for text and outlines, 14:1 */
+	--ink-soft: #5e5246; /* secondary text, 7.4:1 */
+	--barn: #b8402f; /* Swedish falu red, used for accents, 5.2:1 */
+	--sun: #ffd166;
+	--sky: #cfeaf3;
+	--hill-far: #c9e7a6;
+	--hill-mid: #b3dc8e;
+	--grass: #9fd17c; /* the nearest hill and the "From the farm" section */
+	--meadow: #37713d; /* dark green for the "Guest stories" section, cream text is 5.6:1 */
+	--soil: #6b4a35; /* the footer */
+	--wool: #ffffff;
+
+	/* Typefaces */
+	--font-display: 'Fredoka', 'Arial Rounded MT Bold', sans-serif;
+	--font-text: 'Nunito', 'Helvetica Neue', Arial, sans-serif;
+
+	/* Type scale: clamp(smallest, fluid, largest) grows with the screen width */
+	--step--1: clamp(0.875rem, 0.85rem + 0.1vw, 0.9375rem);
+	--step-0: clamp(1.0625rem, 1rem + 0.25vw, 1.1875rem);
+	--step-1: clamp(1.25rem, 1.1rem + 0.6vw, 1.5rem);
+	--step-2: clamp(1.6rem, 1.3rem + 1.4vw, 2.25rem);
+	--step-3: clamp(2.1rem, 1.5rem + 2.8vw, 3.5rem);
+	--step-4: clamp(2.8rem, 1.6rem + 5.5vw, 6rem);
+
+	/* Spacing and shapes */
+	--gutter: clamp(1rem, 0.5rem + 2.5vw, 3rem); /* page edges and grid gaps */
+	--measure: 66ch; /* comfortable line length for reading */
+	--outline: 3px solid var(--ink); /* the cartoon outline */
+	--radius: 1.25rem;
+}
+
+/* ---------- Base ---------- */
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+html {
+	color-scheme: light;
+	-webkit-text-size-adjust: 100%;
+}
+
+/* Glide to #farm and #guests instead of jumping, unless the user prefers less motion */
+@media (prefers-reduced-motion: no-preference) {
+	html {
+		scroll-behavior: smooth;
+	}
+}
+
+/* A column that is at least as tall as the screen, so the footer
+   sits at the bottom even on short pages (main grows to fill the gap) */
+body {
+	display: flex;
+	flex-direction: column;
+	min-height: 100svh;
+	margin: 0;
+	background: var(--cream);
+	color: var(--ink);
+	font-family: var(--font-text);
+	font-size: var(--step-0);
+	line-height: 1.65;
+}
+
+h1,
+h2,
+h3 {
+	margin: 0;
+	font-family: var(--font-display);
+	font-weight: 600;
+	line-height: 1.1;
+	text-wrap: balance;
+}
+
+p {
+	margin: 0 0 1em;
+	text-wrap: pretty;
+}
+
+a {
+	color: inherit;
+	text-decoration-thickness: 2px;
+	text-underline-offset: 0.2em;
+}
+
+a:hover {
+	color: var(--barn);
+}
+
+/* Visible keyboard focus everywhere (only shown for keyboard, not mouse clicks) */
+:focus-visible {
+	outline: 3px solid var(--barn);
+	outline-offset: 3px;
+	border-radius: 4px;
+}
+
+/* ---------- Small reusable pieces ---------- */
+
+/* Small label above a headline */
+.kicker {
+	margin: 0 0 0.5rem;
+	font-size: var(--step--1);
+	font-weight: 800;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--barn);
+}
+
+/* "By Anna · 12 October 2026" */
+.byline {
+	font-size: var(--step--1);
+	color: var(--ink-soft);
+}
+
+/* A round, outlined button-like link */
+.pill {
+	display: inline-block;
+	padding: 0.4rem 1.1rem;
+	border: var(--outline);
+	border-radius: 999px;
+	background: var(--cream);
+	box-shadow: 3px 3px 0 var(--ink);
+	font-family: var(--font-display);
+	font-weight: 600;
+	text-decoration: none;
+	transition:
+		translate 0.15s,
+		box-shadow 0.15s;
+}
+
+.pill:hover {
+	color: var(--ink);
+	background: var(--sun);
+	translate: -1px -1px;
+	box-shadow: 4px 4px 0 var(--ink);
+}
+
+/* Hidden on screen but still read by screen readers */
+.visually-hidden {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+}
