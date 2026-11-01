@@ -1,0 +1,27 @@
+# Dependencies (re-created with `npm install`)
+node_modules
+
+# Build output (re-created by SvelteKit/Vite)
+.output
+.vercel
+.netlify
+.wrangler
+/.svelte-kit
+/build
+
+# OS clutter
+.DS_Store
+Thumbs.db
+
+# Secrets: NEVER commit real environment files.
+# .env.example only contains placeholders, so it is safe to commit.
+.env
+.env.*
+!.env.example
+
+# Vite
+vite.config.js.timestamp-*
+
+# Local AI-assistant tooling (not part of the app)
+.claude/
+skills-lock.json
